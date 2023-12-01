@@ -91,11 +91,58 @@ int obtenerUltimaID(unordered_map<int, Empleado*>& mapa) {
     return ultimaID;
 }
 
-
 void crearEmpleado(string nombre, int edad, int antiguedad, string area, string puesto, double salario, int c_seguridad[], unordered_map<int, Empleado*>& mapa) {
     int nuevaID = obtenerUltimaID(mapa) + 1;
     Empleado* nuevoEmpleado = new Empleado(nombre, edad, antiguedad, nuevaID, area, puesto, salario, c_seguridad);
     mapa[nuevaID] = nuevoEmpleado;
+}
+
+
+void cargarEmpleados(string nombreArchivo) {
+    ifstream archivo(nombreArchivo + ".txt");
+    if (archivo.is_open()) {
+        vector<string> lineas;  
+        string linea;
+        
+       
+        while (getline(archivo, linea)) {
+            lineas.push_back(linea);
+        }
+
+        
+        for (int i = lineas.size() - 1; i >= 0; --i) {
+            stringstream ss(lineas[i]);
+            string token;
+            vector<string> tokens;
+            while (getline(ss, token, ',')) {
+                tokens.push_back(token);
+            }
+            if (tokens.size() == 10) {
+                string nombre = tokens[0];
+                int edad = stoi(tokens[1]);
+                int antiguedad = stoi(tokens[2]);
+                int ID = stoi(tokens[3]);
+                string area = tokens[4];
+                string puesto = tokens[5];
+                double salario = stod(tokens[6]);
+                int c_seguridad[3] = {stoi(tokens[7]), stoi(tokens[8]), stoi(tokens[9])};
+                // Supongo que 'mapa' es una variable global o está definida en tu código
+                crearEmpleado(nombre, edad, antiguedad, area, puesto, salario, c_seguridad, mapa);
+            } else {
+                cout << "Error: formato de línea incorrecto" << endl;
+            }
+        }
+
+        archivo.close();
+        cout << "Datos cargados desde el archivo " << nombreArchivo + ".txt" << endl;
+    } else {
+        cout << "El archivo " << nombreArchivo + ".txt" << " no existe" << endl;
+        cout << "Creando el archivo " << nombreArchivo + ".txt" << endl;
+        ofstream nuevoArchivo(nombreArchivo + ".txt");
+        nuevoArchivo.close();
+        cout << "Archivo creado" << endl;
+        cargarEmpleados(nombreArchivo);
+    }
 }
 
 
@@ -121,6 +168,8 @@ void guardarEmpleados(string nombreArchivo) {
         cout << "No se pudo abrir el archivo " << nombreArchivo << endl;
     }
 }
+
+
 
 void leerEmpleado(int ID, unordered_map<int, Empleado*>& mapa) {
     if (mapa.find(ID) != mapa.end()) {
@@ -206,6 +255,7 @@ void mostrarPromedioSalariosGeneral(const unordered_map<int, Empleado*>& mapa) {
     cout << "\nEl promedio de los salarios de todos los empleados es: " << promedioSalarios << endl;
 }
 
+
 int main() {
     string nombreNuevoEmpleado;
     int edadNuevoEmpleado;
@@ -217,48 +267,9 @@ int main() {
     double salarioNuevoEmpleado;
     int c_seguridadNuevoEmpleado[3] = {};
 
-
-    int c_seguridad1[] = {2, 9, 4};
-    Empleado e1("Juan", 25, 5, 20231, "Ventas", "Gerente", 5000, c_seguridad1);
-    crearEmpleado("Juan", 25, 5, "Ventas", "Gerente", 5000, c_seguridad1, mapa);
-    cout << e1.getNombre() << endl;
-    cout << e1.getEdad() << " anos de edad" << endl;
-    cout << e1.getAntiguedad() << " anos" << endl;
-    cout << "ID: " << e1.getID() << endl;
-    cout << "Area: " << e1.getArea() << endl;
-    cout << "Puesto: " << e1.getPuesto() << endl;
-    cout << "Salario: " << "$" << e1.getSalario() << " pesos" << endl;
-    cout << "Codigo de Seguridad: " << e1.getCodigoSeguridad(0) << e1.getCodigoSeguridad(1) << e1.getCodigoSeguridad(2) << endl;
-    
-    cout << "\n";
-
-    int c_seguridad2[] = {3, 9, 8};
-    Empleado e2("Pedro", 39, 7, 20232, "Almacen", "Gerente", 3500, c_seguridad2);
-    crearEmpleado("Pedro", 39, 7, "Almacen", "Gerente", 3500, c_seguridad2, mapa);
-    cout << e2.getNombre() << endl;
-    cout << e2.getEdad() << " anos de edad" << endl;
-    cout << e2.getAntiguedad() << " anos" << endl;
-    cout << "ID: " << e2.getID() << endl;
-    cout << "Area: " << e2.getArea() << endl;
-    cout << "Puesto: " << e2.getPuesto() << endl;
-    cout << "Salario: " << "$" << e2.getSalario() << " pesos" << endl;
-    cout << "Codigo de Seguridad: " << e2.getCodigoSeguridad(0) << e2.getCodigoSeguridad(1) << e2.getCodigoSeguridad(2) << endl;
-
-    cout << "\n";
-    
-    int c_seguridad3[] = {0, 1, 3};
-    Empleado e3("Lorenzo", 27, 3, 20233, "Recursos Humanos", "Jefe de RH", 9000, c_seguridad3);
-    crearEmpleado("Lorenzo", 27, 3, "Recursos Humanos", "Jefe de RH", 9000, c_seguridad3, mapa);
-    cout << e3.getNombre() << endl;
-    cout << e3.getEdad() << " anos de edad" << endl;
-    cout << e3.getAntiguedad() << " anos" << endl;
-    cout << "ID: " << e3.getID() << endl;
-    cout << "Area: " << e3.getArea() << endl;
-    cout << "Puesto: " << e3.getPuesto() << endl;
-    cout << "Salario: " << "$" << e3.getSalario() << " pesos" << endl;
-    cout << "Codigo de Seguridad: " << e3.getCodigoSeguridad(0) << e3.getCodigoSeguridad(1) << e3.getCodigoSeguridad(2) << endl;
-    
-    cout << "\n";
+    string nombreArchivo = "empleados";
+    cargarEmpleados(nombreArchivo);  // Cargar los datos del archivo al iniciar el programa
+    //guardarEmpleados(nombreArchivo);
 
     while (true) {
         cout << "\nIngrese un comando (crear, leer, actualizar, borrar, guardar, promedio_general, promedio, salir): ";
@@ -286,7 +297,6 @@ int main() {
             cout << "Ingresa tercer digito de seguridad del nuevo empleado\n";
             cin >> c_seguridadNuevoEmpleado[2];
             crearEmpleado(nombreNuevoEmpleado, edadNuevoEmpleado, antiguedadNuevoEmpleado, areaNuevoEmpleado, puestoNuevoEmpleado, salarioNuevoEmpleado, c_seguridadNuevoEmpleado, mapa);
-        
         } else if (comando == "leer") {
             cout << "Ingresa el empleado a leer\n";
             cout << "Ingresa el ID del empleado\n";
@@ -336,16 +346,12 @@ int main() {
                 listaIDs.push_back(ID);
             }
             mostrarPromedioSalarios(mapa, listaIDs);
-        } else if (comando == "guardar") {
-          cout << "Ingrese el nombre del archivo donde se guardarán los datos: ";
-          string nombreArchivo;
-          cin >> nombreArchivo;
-          guardarEmpleados(nombreArchivo);
         } else if (comando == "salir") {
             break;
          } else {
             cout << "Comando no valido" << endl;
         }
+        guardarEmpleados(nombreArchivo);
     }
 
     return 0;
